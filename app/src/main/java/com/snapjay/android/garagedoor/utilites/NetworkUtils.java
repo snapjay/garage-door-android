@@ -2,6 +2,8 @@ package com.snapjay.android.garagedoor.utilites;
 
 import android.net.Uri;
 
+import com.snapjay.android.garagedoor.R;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -11,7 +13,7 @@ import java.util.Scanner;
 
 public class NetworkUtils {
 
-    final static String BASE_URL = "http://door.snapjay.com:8080/api";
+    final static String BASE_URL =  R.string.url + "/api";
 
 
     /**

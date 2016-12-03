@@ -8,7 +8,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.location.Geofence;
 import com.snapjay.android.garagedoor.utilites.NetworkUtils;
+import com.snapjay.android.garagedoor.utilites.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private Socket mSocket;
     {
         try {
-            mSocket = IO.socket("http://192.168.3.146:3000");
+            mSocket = IO.socket(String.valueOf(R.string.url));
+            //mSocket = IO.socket(String.valueOf("http://door.snapjay.com:8080"));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -41,6 +44,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        // https://code.tutsplus.com/tutorials/how-to-work-with-geofences-on-android--cms-26639
+        Geofence geoFence = new Geofence.Builder()
+                .setRequestId("door") // Geofence ID
+                .setCircularRegion( 43.958084, -79.354174, 150) // defining fence region
+                .setExpirationDuration( Geofence.NEVER_EXPIRE ) // expiring date
+                // Transition types that it should look for
+                .setTransitionTypes( Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT )
+                .build();
+
+
+
+
+
+
         mDoorStatus = (TextView) findViewById(R.id.doorStatus);
         mActionDoor = (Button) findViewById(R.id.actionDoor);
 
@@ -49,17 +67,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("MainActivity", buildUrl.toString());
         new queryTask().execute(buildUrl);
 
-        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
-            @Override
-            public void call(Object... args) {
-              //mSocket.emit("foo", "hi");
-
-                Log.d("MainActivity", "CONNECTED");
-                mSocket.disconnect();
-            }
-
-        }).on("statusChange", new Emitter.Listener() {
+        mSocket.on("statusChange", new Emitter.Listener() {
 
             @Override
             public void call(Object... args) {
@@ -70,13 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-                Log.d("MainActivity", "EVENT_DISCONNECT");}
-
         });
+
         mSocket.connect();
 
         // on click
@@ -100,23 +104,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public static String toTitleCase(String input) {
-        StringBuilder titleCase = new StringBuilder();
-        boolean nextTitleCase = true;
 
-        for (char c : input.toCharArray()) {
-            if (Character.isSpaceChar(c)) {
-                nextTitleCase = true;
-            } else if (nextTitleCase) {
-                c = Character.toTitleCase(c);
-                nextTitleCase = false;
-            }
-
-            titleCase.append(c);
-        }
-
-        return titleCase.toString();
-    }
 
     public class queryTask extends AsyncTask<URL, Void, String> {
 
@@ -150,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
                     String status = jsonResponse.getString("status");
             //      Log.d("onPostExecute", status.toString());
 ;
-                    mDoorStatus.setText(toTitleCase(status));
+                    mDoorStatus.setText(Utils.toTitleCase(status));
 
                 } catch (JSONException e){
                     e.printStackTrace();
