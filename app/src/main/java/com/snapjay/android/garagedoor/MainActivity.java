@@ -1,5 +1,6 @@
 package com.snapjay.android.garagedoor;
 
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,8 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private Socket mSocket;
     {
         try {
-            mSocket = IO.socket(String.valueOf(R.string.url));
-            //mSocket = IO.socket(String.valueOf("http://door.snapjay.com:8080"));
+             mSocket = IO.socket("http://door.snapjay.com:8080");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -44,45 +44,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        // https://code.tutsplus.com/tutorials/how-to-work-with-geofences-on-android--cms-26639
-        Geofence geoFence = new Geofence.Builder()
-                .setRequestId("door") // Geofence ID
-                .setCircularRegion( 43.958084, -79.354174, 150) // defining fence region
-                .setExpirationDuration( Geofence.NEVER_EXPIRE ) // expiring date
-                // Transition types that it should look for
-                .setTransitionTypes( Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT )
-                .build();
-
-
-
-
-
+//        // https://code.tutsplus.com/tutorials/how-to-work-with-geofences-on-android--cms-26639
+//        Geofence geoFence = new Geofence.Builder()
+//                .setRequestId("door") // Geofence ID
+//                .setCircularRegion( 43.958084, -79.354174, 150) // defining fence region
+//                .setExpirationDuration( Geofence.NEVER_EXPIRE ) // expiring date
+//                // Transition types that it should look for
+//                .setTransitionTypes( Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT )
+//                .build();
 
         mDoorStatus = (TextView) findViewById(R.id.doorStatus);
         mActionDoor = (Button) findViewById(R.id.actionDoor);
 
-
         URL buildUrl = NetworkUtils.buildUrl("getStatus");
         Log.d("MainActivity", buildUrl.toString());
+
         new queryTask().execute(buildUrl);
-
-
-        mSocket.on("statusChange", new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-                Log.d("MainActivity", "statusChange");
-                Log.d("MainActivity", args.toString());
-                JSONObject obj = (JSONObject)args[0];
-                Log.d("MainActivity", obj.toString());
-
-            }
-
-        });
 
         mSocket.connect();
 
+        mSocket.on("new message", onNewMessage);
         // on click
         // makeGithubSearchQuery();
     }
@@ -105,6 +86,35 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+
+        @Override
+        public void call(final Object... args) {
+            Log.d("onNewMessage", "CALL");
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    String message;
+                    Log.d("onNewMessage", "RUN");
+                    Log.d("onNewMessage", data.toString());
+                    try {
+                        username = data.getString("username");
+                        message = data.getString("message");
+                        Log.d("onNewMessage", username);
+                        Log.d("onNewMessage", message);
+
+                    } catch (JSONException e) {
+                        return;
+                    }
+
+                    //removeTyping(username);
+                    //addMessage(username, message);
+                }
+            });
+        }
+    };
 
     public class queryTask extends AsyncTask<URL, Void, String> {
 

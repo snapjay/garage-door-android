@@ -13,16 +13,17 @@ import java.util.Scanner;
 
 public class NetworkUtils {
 
-    final static String BASE_URL =  R.string.url + "/api";
+    final static String BASE_URL =  "http://door.snapjay.com:8080" + "/api";
 
 
     /**
      * Builds the URL used to query .
      *
-     * @param path The API rresource name.
+     * @param path The API resource name.
      * @return The URL to use to query the weather server.
      */
     public static URL buildUrl(String path) {
+
         Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(path)
                 .build();
