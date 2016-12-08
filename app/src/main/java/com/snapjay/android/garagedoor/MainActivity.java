@@ -56,18 +56,15 @@ public class MainActivity extends AppCompatActivity {
         mDoorStatus = (TextView) findViewById(R.id.doorStatus);
         mActionDoor = (Button) findViewById(R.id.actionDoor);
 
-        URL buildUrl = NetworkUtils.buildUrl("getStatus");
-        Log.d("MainActivity", buildUrl.toString());
+        URL getStatusURL = NetworkUtils.buildUrl("getStatus");
+        Log.d("MainActivity", getStatusURL.toString());
 
-        new queryTask().execute(buildUrl);
+        new queryTask().execute(getStatusURL);
 
         mSocket.connect();
-
-        mSocket.on("new message", onNewMessage);
-        // on click
-        // makeGithubSearchQuery();
+        mSocket.on("statusChange", onNewMessage);
+        
     }
-
 
 
     public void getStatus(View view) {
@@ -94,17 +91,17 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    String message;
-                    Log.d("onNewMessage", "RUN");
-                    Log.d("onNewMessage", data.toString());
-                    try {
-                        username = data.getString("username");
-                        message = data.getString("message");
-                        Log.d("onNewMessage", username);
-                        Log.d("onNewMessage", message);
 
+
+                    JSONObject data = (JSONObject) args[0];
+                    String status;
+                    Log.d("onNewMessage", "RUN");
+                    Log.d("onNewMessage", args[0].toString());
+                    try {
+                    status = data.getString("status");
+                        mDoorStatus.setText(Utils.toTitleCase(status));
+                        Log.d("onNewMessage", status);
+//
                     } catch (JSONException e) {
                         return;
                     }
@@ -122,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
 
-            mDoorStatus.setText("Connecting...");
+           // mDoorStatus.setText("Connecting...");
         }
 
         @Override
@@ -144,9 +141,15 @@ public class MainActivity extends AppCompatActivity {
             if (response != null && !response.equals("")) {
                 try {
                     //TODO: If request is 'action' Response is result:bool
-                    JSONObject jsonResponse = new JSONObject(response);
+
+//                    SAMPLE:  /getStatus Request
+//                    {error: null, status: "closed"}
+//                    SAMPLE:  /action Request
+//                    {error: null, result: true}
+
+                     JSONObject jsonResponse = new JSONObject(response);
                     String status = jsonResponse.getString("status");
-            //      Log.d("onPostExecute", status.toString());
+                    Log.d("onPostExecute", status);
 ;
                     mDoorStatus.setText(Utils.toTitleCase(status));
 
