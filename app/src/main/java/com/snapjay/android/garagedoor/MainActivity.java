@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.location.Geofence;
 import com.snapjay.android.garagedoor.utilites.NetworkUtils;
 import com.snapjay.android.garagedoor.utilites.Utils;
@@ -16,13 +17,19 @@ import com.snapjay.android.garagedoor.utilites.Utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,109 +63,102 @@ public class MainActivity extends AppCompatActivity {
         mDoorStatus = (TextView) findViewById(R.id.doorStatus);
         mActionDoor = (Button) findViewById(R.id.actionDoor);
 
-        URL getStatusURL = NetworkUtils.buildUrl("getStatus");
-        Log.d("MainActivity", getStatusURL.toString());
-
-        new queryTask().execute(getStatusURL);
 
         mSocket.connect();
-        mSocket.on("statusChange", onNewMessage);
-        
+        mSocket.on("statusChange", ioStatusChange);
+
+        getStatus();
     }
 
+// SAMPLE:  /getStatus Request
+// {error: null, status: "closed"}
+    public void getStatus() {
+        URL getStatusURL = NetworkUtils.buildUrl("getStatus");
 
-    public void getStatus(View view) {
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-        URL buildUrl = NetworkUtils.buildUrl("getStatus");
-        Log.d("MainActivity", buildUrl.toString());
-        new queryTask().execute(buildUrl);
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, getStatusURL.toString(), null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            mDoorStatus.setText(Utils.toTitleCase(response.getString("status")));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("getStatus", error.getMessage());
+                    }
+                });
+
+        queue.add(jsObjRequest);
+
     }
+
+//  SAMPLE:  /action Request
+//  {error: null, result: true}
 
   public void actionDoor(View view) {
 
-        URL buildUrl = NetworkUtils.buildUrl("action");
-        Log.d("MainActivity", buildUrl.toString());
-        new queryTask().execute(buildUrl);
-    }
+      URL getStatusURL = NetworkUtils.buildUrl("action");
+
+      RequestQueue queue = Volley.newRequestQueue(this);
+
+      JsonObjectRequest jsObjRequest = new JsonObjectRequest
+              (Request.Method.GET, getStatusURL.toString(), null, new Response.Listener<JSONObject>() {
+
+                  @Override
+                  public void onResponse(JSONObject response) {
+                      try {
+                          Log.d("getStatus", response.getBoolean("result") ? "true" : "false");
+                          response.getBoolean("result");
+                      } catch (JSONException e) {
+                          e.printStackTrace();
+                      }
+                  }
+              }, new Response.ErrorListener() {
+
+                  @Override
+                  public void onErrorResponse(VolleyError error) {
+                      Log.e("getStatus", error.getMessage());
+
+                  }
+              });
+
+      queue.add(jsObjRequest);
+
+  }
 
 
 
-    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+    private Emitter.Listener ioStatusChange = new Emitter.Listener() {
 
         @Override
         public void call(final Object... args) {
-            Log.d("onNewMessage", "CALL");
+
             MainActivity.this.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
 
-
                     JSONObject data = (JSONObject) args[0];
                     String status;
-                    Log.d("onNewMessage", "RUN");
-                    Log.d("onNewMessage", args[0].toString());
                     try {
                     status = data.getString("status");
                         mDoorStatus.setText(Utils.toTitleCase(status));
-                        Log.d("onNewMessage", status);
-//
+                        Log.d("ioStatusChange", status);
+
                     } catch (JSONException e) {
-                        return;
+                        e.printStackTrace();
                     }
 
-                    //removeTyping(username);
-                    //addMessage(username, message);
                 }
             });
         }
     };
 
-    public class queryTask extends AsyncTask<URL, Void, String> {
-
-
-        @Override
-        protected void onPreExecute() {
-
-           // mDoorStatus.setText("Connecting...");
-        }
-
-        @Override
-        protected String doInBackground(URL... params) {
-            URL searchUrl = params[0];
-            String response = null;
-            try {
-                response = NetworkUtils.getResponseFromHttpUrl(searchUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return response;
-        }
-
-
-        @Override
-        protected void onPostExecute(String response) {
-
-            if (response != null && !response.equals("")) {
-                try {
-                    //TODO: If request is 'action' Response is result:bool
-
-//                    SAMPLE:  /getStatus Request
-//                    {error: null, status: "closed"}
-//                    SAMPLE:  /action Request
-//                    {error: null, result: true}
-
-                     JSONObject jsonResponse = new JSONObject(response);
-                    String status = jsonResponse.getString("status");
-                    Log.d("onPostExecute", status);
-;
-                    mDoorStatus.setText(Utils.toTitleCase(status));
-
-                } catch (JSONException e){
-                    e.printStackTrace();
-                }
-
-
-            }
-        }
-    }
 }

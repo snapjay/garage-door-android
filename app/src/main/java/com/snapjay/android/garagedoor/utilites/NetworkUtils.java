@@ -1,6 +1,7 @@
 package com.snapjay.android.garagedoor.utilites;
 
 import android.net.Uri;
+import android.util.Log;
 
 import com.snapjay.android.garagedoor.R;
 
@@ -34,6 +35,7 @@ public class NetworkUtils {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        Log.d("NetworkUtils", url.toString());
 
         return url;
     }
