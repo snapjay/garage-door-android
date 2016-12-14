@@ -1,16 +1,19 @@
 package com.snapjay.android.garagedoor;
 
-import android.content.res.Resources;
-import android.os.AsyncTask;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.graphics.BitmapFactory;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.android.gms.location.Geofence;
 import com.snapjay.android.garagedoor.utilites.NetworkUtils;
 import com.snapjay.android.garagedoor.utilites.Utils;
 
@@ -35,6 +38,11 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mDoorStatus;
     private Button mActionDoor;
+    public static final String OI_EVENT_STATUS_CHANGE = "statusChange";
+    public static final String OI_EVENT_ALERT = "alert";
+    public static final String OI_ALERT_DOOR_OPEN = "DOOR_OPEN";
+    public static final String OI_ALERT_DOOR_TRANSITION = "DOOR_TRANSITION";
+
 
     private Socket mSocket;
     {
@@ -59,13 +67,12 @@ public class MainActivity extends AppCompatActivity {
 //                // Transition types that it should look for
 //                .setTransitionTypes( Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT )
 //                .build();
-
         mDoorStatus = (TextView) findViewById(R.id.doorStatus);
         mActionDoor = (Button) findViewById(R.id.actionDoor);
 
-
         mSocket.connect();
-        mSocket.on("statusChange", ioStatusChange);
+        mSocket.on(OI_EVENT_STATUS_CHANGE, ioStatusChange);
+        mSocket.on(OI_EVENT_ALERT, ioAlert);
 
         getStatus();
     }
@@ -98,6 +105,53 @@ public class MainActivity extends AppCompatActivity {
 
         queue.add(jsObjRequest);
 
+    }
+
+
+    public void notify(View view){
+
+        displayNotify(OI_ALERT_DOOR_OPEN);
+        displayNotify(OI_ALERT_DOOR_TRANSITION);
+
+    }
+
+    public int NOTIFICATION_ID;
+    public void displayNotify(String status){
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+
+        //icon appears in device notification bar and right hand corner of notification
+        builder.setSmallIcon(R.drawable.ic_speaker_dark);
+
+        // This intent is fired when notification is clicked
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        // Set the intent that will fire when the user taps the notification.
+        builder.setContentIntent(pendingIntent);
+
+        // Large icon appears on the left of the notification
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.door_icon));
+
+        // Content title, which appears in large type at the top of the notification
+
+        builder.setContentTitle(getString(R.string.app_name));
+        builder.setSubText(getString(R.string.notifyWarning));
+        builder.setAutoCancel(true);
+
+        if (status.equals(OI_ALERT_DOOR_OPEN)) {
+            builder.setContentText(getString(R.string.notifyDOOR_OPEN));
+            NOTIFICATION_ID = 1;
+        } else if (status.equals(OI_ALERT_DOOR_TRANSITION)) {
+            builder.setContentText(getString(R.string.notifyDOOR_TRANSITION));
+            NOTIFICATION_ID = 2;
+        }
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        // Will display the notification in the notification bar
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
+        //notificationManager.cancel(NOTIFICATION_ID);
     }
 
 //  SAMPLE:  /action Request
@@ -135,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
   }
 
 
-
     private Emitter.Listener ioStatusChange = new Emitter.Listener() {
 
         @Override
@@ -151,6 +204,32 @@ public class MainActivity extends AppCompatActivity {
                     status = data.getString("status");
                         mDoorStatus.setText(Utils.toTitleCase(status));
                         Log.d("ioStatusChange", status);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener ioAlert = new Emitter.Listener() {
+
+        @Override
+        public void call(final Object... args) {
+
+            MainActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    JSONObject data = (JSONObject) args[0];
+                    String status;
+                    try {
+                    status = data.getString("status");
+
+                        Log.d("ioAlert", status);
+                        displayNotify(status);
 
                     } catch (JSONException e) {
                         e.printStackTrace();

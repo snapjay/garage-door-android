@@ -14,30 +14,42 @@
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Status:"
+        android:text="@string/lblStatus"
         android:textStyle="bold"
-        />
-
-    <Button
-        android:onClick="actionDoor"
-        android:text="Activate Door"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:id="@+id/actionDoor"
-        android:layout_weight="1"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="35dp"
-        android:textSize="23dp"
         />
 
     <TextView
         android:id="@+id/doorStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Unknown"
+        android:hint="@string/Unknown"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="65dp" />
+        android:layout_marginStart="65dp"
+        />
+
+    <Button
+        android:onClick="actionDoor"
+        android:text="@string/cmdActivate"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:id="@+id/actionDoor"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="35dp"
+        android:textSize="23sp"
+        />
+
+    <Button
+        android:onClick="notify"
+        android:text="Notify Simulator"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:id="@+id/notify"
+        android:textSize="12sp"
+        android:layout_below="@+id/actionDoor"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="33dp"
+        />
 
 
 </RelativeLayout>

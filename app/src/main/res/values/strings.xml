@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Garage Door</string>
-    <string name="url">http://door.snapjay.com:8080</string>
+    <string name="lblStatus">Status:</string>
+    <string name="Unknown">Unknown</string>
+    <string name="cmdActivate">Activate Door</string>
+    <string name="notifyWarning">WARNING</string>
+    <string name="notifyDOOR_OPEN">Door has been open for over 15 minutes</string>
+    <string name="notifyDOOR_TRANSITION">Door in transition for over 30 seconds</string>
 </resources>
