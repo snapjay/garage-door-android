@@ -1,10 +1,12 @@
 package com.snapjay.android.garagedoor;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
@@ -138,6 +140,10 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentTitle(getString(R.string.app_name));
         builder.setSubText(getString(R.string.notifyWarning));
         builder.setAutoCancel(true);
+        builder.setVibrate(new long[] {1000, 1000, 1000});
+        builder.setLights(Color.RED, 3000, 3000);
+        builder.setDefaults(Notification.DEFAULT_SOUND);
+
 
         if (status.equals(OI_ALERT_DOOR_OPEN)) {
             builder.setContentText(getString(R.string.notifyDOOR_OPEN));
