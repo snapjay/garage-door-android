@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentIntent(pendingIntent);
 
         // Large icon appears on the left of the notification
-        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.door_icon));
+        builder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
 
         // Content title, which appears in large type at the top of the notification
 
