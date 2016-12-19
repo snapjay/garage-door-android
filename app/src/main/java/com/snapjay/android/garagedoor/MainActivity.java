@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 
 import android.graphics.Color;
+import android.support.annotation.IntegerRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
@@ -112,13 +113,13 @@ public class MainActivity extends AppCompatActivity {
 
     public void notify(View view){
 
-        displayNotify(OI_ALERT_DOOR_OPEN);
-        displayNotify(OI_ALERT_DOOR_TRANSITION);
+        displayNotify(OI_ALERT_DOOR_OPEN, 15*60 );
+        displayNotify(OI_ALERT_DOOR_TRANSITION, 30);
 
     }
 
     public int NOTIFICATION_ID;
-    public void displayNotify(String status){
+    public void displayNotify(String status, int time){
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
@@ -146,10 +147,10 @@ public class MainActivity extends AppCompatActivity {
 
 
         if (status.equals(OI_ALERT_DOOR_OPEN)) {
-            builder.setContentText(getString(R.string.notifyDOOR_OPEN));
+            builder.setContentText(String.format(getString(R.string.notifyDOOR_OPEN), (time/60)));
             NOTIFICATION_ID = 1;
         } else if (status.equals(OI_ALERT_DOOR_TRANSITION)) {
-            builder.setContentText(getString(R.string.notifyDOOR_TRANSITION));
+            builder.setContentText(String.format(getString(R.string.notifyDOOR_TRANSITION), time));
             NOTIFICATION_ID = 2;
         }
 
@@ -231,11 +232,13 @@ public class MainActivity extends AppCompatActivity {
 
                     JSONObject data = (JSONObject) args[0];
                     String status;
+                    Integer time;
                     try {
-                    status = data.getString("status");
+                        status = data.getString("status");
+                        time = data.getInt("time");
 
                         Log.d("ioAlert", status);
-                        displayNotify(status);
+                        displayNotify(status, time);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
