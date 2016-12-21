@@ -43,13 +43,25 @@
         android:onClick="notify"
         android:text="Notify Simulator"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="50dp"
         android:id="@+id/notify"
         android:textSize="12sp"
         android:layout_below="@+id/actionDoor"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="33dp"
+        android:layout_marginTop="10dp"
         />
+    <Button
+        android:onClick="theme"
+        android:text="Toggle Theme"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/theme"
+        android:textSize="12sp"
+        android:layout_below="@+id/notify"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="10dp"
+        />
+
 
 
 </RelativeLayout>

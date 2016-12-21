@@ -60,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
         setContentView(R.layout.activity_main);
 
 //        // https://code.tutsplus.com/tutorials/how-to-work-with-geofences-on-android--cms-26639
@@ -78,6 +81,15 @@ public class MainActivity extends AppCompatActivity {
         mSocket.on(OI_EVENT_ALERT, ioAlert);
 
         getStatus();
+    }
+
+
+    public void theme(View view){
+
+
+        Utils.changeToTheme(this, Utils.NIGHT_MODE);
+       // Utils.changeToTheme(this, Utils.DAY_MODE);
+
     }
 
 // SAMPLE:  /getStatus Request
