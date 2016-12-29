@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
     public int NOTIFICATION_ID;
     public void displayNotify(String status, int time){
 
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         //icon appears in device notification bar and right hand corner of notification
@@ -157,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setVibrate(new long[] {1000, 1000, 1000});
         builder.setLights(Color.RED, 3000, 3000);
         builder.setDefaults(Notification.DEFAULT_SOUND);
-
+        builder.addAction(R.drawable.door_icon, getString(R.string.cmdActivate), pendingIntent);
 
         if (status.equals(OI_ALERT_DOOR_OPEN)) {
             builder.setContentText(String.format(getString(R.string.notifyDOOR_OPEN), (time/60)));
