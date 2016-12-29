@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.snapjay.android.garagedoor.utilites.NetworkUtils;
+import com.snapjay.android.garagedoor.utilites.Theme;
 import com.snapjay.android.garagedoor.utilites.Utils;
 
 import org.json.JSONException;
@@ -60,9 +61,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
+        Theme.onActivityCreateSetTheme(this);
         setContentView(R.layout.activity_main);
 
 //        // https://code.tutsplus.com/tutorials/how-to-work-with-geofences-on-android--cms-26639
@@ -84,12 +83,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void theme(View view){
-
-
-        Utils.changeToTheme(this, Utils.NIGHT_MODE);
-       // Utils.changeToTheme(this, Utils.DAY_MODE);
-
+    public void toggleTheme(View view){
+        Theme.toggle(this);
     }
 
 // SAMPLE:  /getStatus Request
@@ -114,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
+
+                        mDoorStatus.setText("No Internet Connection");
                         Log.e("getStatus", error.getMessage());
                     }
                 });

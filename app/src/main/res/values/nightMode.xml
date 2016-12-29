@@ -2,11 +2,10 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="NightMode" parent="Theme.AppCompat.DayNight.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorBlack</item>
-        <item name="colorPrimaryDark">@color/colorBlack</item>
-        <item name="colorAccent">@color/colorBlack</item>
+    <style name="NightMode" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textColor">@color/nightText</item>
+        <item name="android:background">@color/nightBackground</item>
+        <item name="android:colorButtonNormal">@color/nightButton</item>
     </style>
 
 </resources>
