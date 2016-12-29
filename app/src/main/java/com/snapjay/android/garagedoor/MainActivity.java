@@ -120,6 +120,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    public void getStatus(View view){
+        getStatus();
+    }
+
     public void notify(View view){
 
         displayNotify(OI_ALERT_DOOR_OPEN, 15*60 );

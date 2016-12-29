@@ -3,6 +3,7 @@
     <string name="lblStatus">Status:</string>
     <string name="Unknown">Unknown</string>
     <string name="cmdActivate">Activate Door</string>
+    <string name="cmdToggleTheme">Toggle Theme</string>
     <string name="notifyWarning">WARNING</string>
     <string name="notifyDOOR_OPEN">Door has been open for over %1$d minutes</string>
     <string name="notifyDOOR_TRANSITION">Door in transition for over %1$d seconds</string>

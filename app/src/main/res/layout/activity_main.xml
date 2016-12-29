@@ -11,6 +11,7 @@
     tools:context="com.snapjay.android.garagedoor.MainActivity">
 
     <TextView
+        android:onClick="getStatus"
         android:id="@+id/label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,6 +20,7 @@
         />
 
     <TextView
+        android:onClick="getStatus"
         android:id="@+id/doorStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,7 +54,7 @@
         />
     <Button
         android:onClick="toggleTheme"
-        android:text="Toggle Theme"
+        android:text="@string/cmdToggleTheme"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:id="@+id/theme"
