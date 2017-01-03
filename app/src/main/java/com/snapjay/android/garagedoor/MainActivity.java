@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 
 import android.graphics.Color;
-import android.support.annotation.IntegerRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
@@ -19,6 +18,7 @@ import android.widget.TextView;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.snapjay.android.garagedoor.utilites.NetworkUtils;
 import com.snapjay.android.garagedoor.utilites.Theme;
+import com.snapjay.android.garagedoor.utilites.TimedAction;
 import com.snapjay.android.garagedoor.utilites.Utils;
 
 import org.json.JSONException;
@@ -41,7 +41,7 @@ import com.android.volley.toolbox.Volley;
 public class MainActivity extends AppCompatActivity {
 
     private TextView mDoorStatus;
-    private Button mActionDoor;
+    private static final TimedAction _timedAction = new TimedAction();
     public static final String OI_EVENT_STATUS_CHANGE = "statusChange";
     public static final String OI_EVENT_ALERT = "alert";
     public static final String OI_ALERT_DOOR_OPEN = "DOOR_OPEN";
@@ -49,9 +49,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     private Socket mSocket;
+
     {
         try {
-             mSocket = IO.socket("http://door.snapjay.com:8080");
+            mSocket = IO.socket("http://door.snapjay.com:8080");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -73,7 +74,9 @@ public class MainActivity extends AppCompatActivity {
 //                .setTransitionTypes( Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT )
 //                .build();
         mDoorStatus = (TextView) findViewById(R.id.doorStatus);
-        mActionDoor = (Button) findViewById(R.id.actionDoor);
+
+        _timedAction.setUpdateText((TextView) findViewById(R.id.txtTimeOpen));
+        _timedAction.setCancelButton((Button) findViewById(R.id.cmdCancelTimeOpen));
 
         mSocket.connect();
         mSocket.on(OI_EVENT_STATUS_CHANGE, ioStatusChange);
@@ -83,11 +86,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void toggleTheme(View view){
+    public void actionTimedOpen(View view) {
+
+        switch (view.getId()) {
+
+            case R.id.cmdTimeOpen:
+                Log.d("Main ACTIVITY", "TIME START");
+                _timedAction.start();
+
+                break;
+            case R.id.cmdCancelTimeOpen:
+                Log.d("Main ACTIVITY", "TIME CANCEL");
+                _timedAction.cancel();
+                break;
+        }
+
+    }
+
+
+    public void toggleTheme(View view) {
         Theme.toggle(this);
     }
 
-// SAMPLE:  /getStatus Request
+    // SAMPLE:  /getStatus Request
 // {error: null, status: "closed"}
     public void getStatus() {
         URL getStatusURL = NetworkUtils.buildUrl("getStatus");
@@ -120,19 +141,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void getStatus(View view){
+    public void getStatus(View view) {
         getStatus();
     }
 
-    public void notify(View view){
 
-        displayNotify(OI_ALERT_DOOR_OPEN, 15*60 );
+    public void notify(View view) {
+
+        displayNotify(OI_ALERT_DOOR_OPEN, 15 * 60);
         displayNotify(OI_ALERT_DOOR_TRANSITION, 30);
 
     }
 
+
     public int NOTIFICATION_ID;
-    public void displayNotify(String status, int time){
+
+    public void displayNotify(String status, int time) {
 
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
@@ -155,13 +179,13 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentTitle(getString(R.string.app_name));
         builder.setSubText(getString(R.string.notifyWarning));
         builder.setAutoCancel(true);
-        builder.setVibrate(new long[] {1000, 1000, 1000});
+        builder.setVibrate(new long[]{1000, 1000, 1000});
         builder.setLights(Color.RED, 3000, 3000);
         builder.setDefaults(Notification.DEFAULT_SOUND);
         builder.addAction(R.drawable.door_icon, getString(R.string.cmdActivate), pendingIntent);
 
         if (status.equals(OI_ALERT_DOOR_OPEN)) {
-            builder.setContentText(String.format(getString(R.string.notifyDOOR_OPEN), (time/60)));
+            builder.setContentText(String.format(getString(R.string.notifyDOOR_OPEN), (time / 60)));
             NOTIFICATION_ID = 1;
         } else if (status.equals(OI_ALERT_DOOR_TRANSITION)) {
             builder.setContentText(String.format(getString(R.string.notifyDOOR_TRANSITION), time));
@@ -178,36 +202,44 @@ public class MainActivity extends AppCompatActivity {
 //  SAMPLE:  /action Request
 //  {error: null, result: true}
 
-  public void actionDoor(View view) {
+    public void actionDoor(View view) {
+        actionDoor();
+    }
 
-      URL getStatusURL = NetworkUtils.buildUrl("action");
+    public void actionDoor() {
 
-      RequestQueue queue = Volley.newRequestQueue(this);
+        _timedAction.cancel();
+        Log.d("Main ACTIVITY", "ACTION DOOR");
 
-      JsonObjectRequest jsObjRequest = new JsonObjectRequest
-              (Request.Method.GET, getStatusURL.toString(), null, new Response.Listener<JSONObject>() {
 
-                  @Override
-                  public void onResponse(JSONObject response) {
-                      try {
-                          Log.d("getStatus", response.getBoolean("result") ? "true" : "false");
-                          response.getBoolean("result");
-                      } catch (JSONException e) {
-                          e.printStackTrace();
-                      }
-                  }
-              }, new Response.ErrorListener() {
+        URL getStatusURL = NetworkUtils.buildUrl("action");
 
-                  @Override
-                  public void onErrorResponse(VolleyError error) {
-                      Log.e("getStatus", error.getMessage());
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-                  }
-              });
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.GET, getStatusURL.toString(), null, new Response.Listener<JSONObject>() {
 
-      queue.add(jsObjRequest);
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Log.d("getStatus", response.getBoolean("result") ? "true" : "false");
+                            response.getBoolean("result");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
 
-  }
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("getStatus", error.getMessage());
+
+                    }
+                });
+
+        queue.add(jsObjRequest);
+
+    }
 
 
     private Emitter.Listener ioStatusChange = new Emitter.Listener() {
@@ -222,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject data = (JSONObject) args[0];
                     String status;
                     try {
-                    status = data.getString("status");
+                        status = data.getString("status");
                         mDoorStatus.setText(Utils.toTitleCase(status));
                         Log.d("ioStatusChange", status);
 
