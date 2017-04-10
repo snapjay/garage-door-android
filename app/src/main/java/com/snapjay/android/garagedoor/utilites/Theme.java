@@ -64,7 +64,7 @@ public class Theme {
         Calendar c = Calendar.getInstance();
         int h = c.get(Calendar.HOUR_OF_DAY);
 
-        if (h >= 7 && h <= 17) {
+        if (h >= 6 && h <= 19) {
             setTheme(DAY_MODE);
         } else {
             setTheme(NIGHT_MODE);
